@@ -256,7 +256,7 @@ void runProgram(std::string program, int value) {
                             findTag(program, i, value);
                         }
                     }   
-                } else if (str == "pz") {
+                } else if (str == "zp") {
                     i++;
                     i++;
                     if (isdigit(program.at(i))) {
@@ -269,7 +269,7 @@ void runProgram(std::string program, int value) {
                             findTag(program, i, value);
                         }
                     }   
-                } else if (str == "npz") {
+                } else if (str == "nzp") {
                     i++;
                     i++;
                     if (isdigit(program.at(i))) {
