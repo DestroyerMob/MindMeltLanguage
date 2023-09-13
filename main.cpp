@@ -147,14 +147,108 @@ void runProgram(std::string program, int value) {
             bytes[pointer] = int(line.at(0));
         } else if (program.at(i) == '?') {
             i++;
-            if (isdigit(program.at(i))) {
-                int tagNum = readNum(program, i);
-                if (tagNum == bytes[pointer]) {
-                    findTag(program, i, tagNum);
+            if (program.at(i) == '=') {
+                i++;
+                if (isdigit(program.at(i))) {
+                    int tagNum = readNum(program, i);
+                    if (tagNum == bytes[pointer]) {
+                        findTag(program, i, tagNum);
+                    }
+                } else if (program.at(i) == '$') {
+                    if (bytes[pointer] == value) {
+                        findTag(program, i, value);
+                    }
                 }
-            } else if (program.at(i) == '$') {
-                if (bytes[pointer] == value) {
-                    findTag(program, i, value);
+            } else if (program.at(i) == '\"') {
+                i++;
+                std::string str = readString(program, i);
+                if (str == "n") {
+                    i++;
+                    i++;
+                    if (isdigit(program.at(i))) {
+                        int tagNum = readNum(program, i);
+                        if (bytes[pointer] < 0) {
+                            findTag(program, i, tagNum);
+                        }
+                    } else if (program.at(i) == '$') {
+                        if (bytes[pointer] < 0) {
+                            findTag(program, i, value);
+                        }
+                    }              
+                } else if (str == "p") {
+                    i++;
+                    i++;
+                    if (isdigit(program.at(i))) {
+                        int tagNum = readNum(program, i);
+                        if (bytes[pointer] > 0) {
+                            findTag(program, i, tagNum);
+                        }
+                    } else if (program.at(i) == '$') {
+                        if (bytes[pointer] > 0) {
+                            findTag(program, i, value);
+                        }
+                    }              
+                } else if (str == "z") {
+                    i++;
+                    i++;
+                    if (isdigit(program.at(i))) {
+                        int tagNum = readNum(program, i);
+                        if (bytes[pointer] == 0) {
+                            findTag(program, i, tagNum);
+                        }
+                    } else if (program.at(i) == '$') {
+                        if (bytes[pointer] == 0) {
+                            findTag(program, i, value);
+                        }
+                    }              
+                } else if (str == "np") {
+                    i++;
+                    i++;
+                    if (isdigit(program.at(i))) {
+                        int tagNum = readNum(program, i);
+                        if (bytes[pointer] != 0) {
+                            findTag(program, i, tagNum);
+                        }
+                    } else if (program.at(i) == '$') {
+                        if (bytes[pointer] != 0) {
+                            findTag(program, i, value);
+                        }
+                    }   
+                } else if (str == "nz") {
+                    i++;
+                    i++;
+                    if (isdigit(program.at(i))) {
+                        int tagNum = readNum(program, i);
+                        if (bytes[pointer] <= 0) {
+                            findTag(program, i, tagNum);
+                        }
+                    } else if (program.at(i) == '$') {
+                        if (bytes[pointer] <= 0) {
+                            findTag(program, i, value);
+                        }
+                    }   
+                } else if (str == "pz") {
+                    i++;
+                    i++;
+                    if (isdigit(program.at(i))) {
+                        int tagNum = readNum(program, i);
+                        if (bytes[pointer] >= 0) {
+                            findTag(program, i, tagNum);
+                        }
+                    } else if (program.at(i) >= '$') {
+                        if (bytes[pointer] <= 0) {
+                            findTag(program, i, value);
+                        }
+                    }   
+                } else if (str == "npz") {
+                    i++;
+                    i++;
+                    if (isdigit(program.at(i))) {
+                        int tagNum = readNum(program, i);
+                        findTag(program, i, tagNum);
+                    } else if (program.at(i) == '$') {
+                        findTag(program, i, value);
+                    }   
                 }
             }
         } else if (program.at(i) == '$') {
@@ -191,7 +285,12 @@ void runProgram(std::string program, int value) {
                 }
             }
         } else if (program.at(i) == '@') {
-
+            i++;
+            if (isdigit(program.at(i))) {
+                pointer = readNum(program, i);
+            } else if (program.at(i) == '$') {
+                pointer = value;
+            }
         }
     }
 }
