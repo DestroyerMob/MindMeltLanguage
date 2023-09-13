@@ -23,6 +23,23 @@ int readNum(std::string program, int& index) {
     return std::stoi(numStr.str());
 }
 
+char readChar(std::string program, int& index) {
+    std::stringstream sStr;
+
+    while (program.at(index) != '\'') {
+        sStr << program.at(index);
+        if (index < program.size() - 1) {
+            index++;
+        } else {
+            break;
+        }
+    }
+
+    index--;
+
+    return sStr.str().at(0);
+}
+
 std::string readString(std::string program, int& index) {
     std::stringstream sStr;
 
@@ -135,6 +152,18 @@ void runProgram(std::string program, int value) {
                     bytes[pointer] /= value;
                 } else {
                     bytes[pointer] /= 2;
+                }
+            }
+        } else if (program.at(i) == '%') {
+            if (i + 1 < program.size()) {
+                if (isdigit(program.at(i + 1))) {
+                    i++;
+                    bytes[pointer] %= readNum(program, i);
+                } else if (program.at(i + 1) == '$') {
+                    i++;
+                    bytes[pointer] %= value;
+                } else {
+                    bytes[pointer] %= 2;
                 }
             }
         } else if (program.at(i) == '.') {
@@ -269,6 +298,10 @@ void runProgram(std::string program, int value) {
                     pointer++;
                 }
                 bytes[pointer] = j;
+            } else if (program.at(i) == '\'') {
+                i++;
+                char ch = readChar(program, i);
+                bytes[pointer] = int(ch);
             }
         } else if (program.at(i) == ';') {
             i++;
@@ -291,6 +324,20 @@ void runProgram(std::string program, int value) {
             } else if (program.at(i) == '$') {
                 pointer = value;
             }
+        } else if (program.at(i) == '#') {
+            std::string line;
+            getline(std::cin, line);
+            int j = 0;
+            for (int k = 0; k < line.size(); k++) {
+                j++;
+                bytes[pointer] = line.at(k);
+                pointer++;
+            }
+            bytes[pointer] = j;
+        } else if (program.at(i) == '&') {
+            std::string line;
+            getline(std::cin, line);
+            bytes[pointer] = std::atoi(line.c_str());
         }
     }
 }
