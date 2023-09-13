@@ -23,12 +23,21 @@ int readNum(std::string program, int& index) {
     return std::stoi(numStr.str());
 }
 
-void readString(std::string program, int& index) {
+std::string readString(std::string program, int& index) {
     std::stringstream sStr;
 
     while (program.at(index) != '\"') {
-        
+        sStr << program.at(index);
+        if (index < program.size() - 1) {
+            index++;
+        } else {
+            break;
+        }
     }
+
+    index--;
+
+    return sStr.str();
 }
 
 void findTag(std::string program, int& index, int tag) {
@@ -49,15 +58,39 @@ void findTag(std::string program, int& index, int tag) {
 void runProgram(std::string program, int value) {
     for (int i = 0; i < program.size(); i++) {
         if (program.at(i) == '>') {
-            pointer++;
+            if (i + 1 < program.size()) {
+                if (isdigit(program.at(i + 1))) {
+                    i++;
+                    pointer += readNum(program, i);
+                } else if (program.at(i + 1) == '$') {
+                    i++;
+                    pointer += value;
+                } else {
+                    pointer++;
+                }
+            } else {
+                pointer++;
+            }
         } else if (program.at(i) == '<') {
-            pointer--;
+            if (i + 1 < program.size()) {
+                if (isdigit(program.at(i + 1))) {
+                    i++;
+                    pointer -= readNum(program, i);
+                } else if (program.at(i + 1) == '$') {
+                    i++;
+                    pointer -= value;
+                } else {
+                    pointer--;
+                }
+            } else {
+                pointer--;
+            }
         } else if (program.at(i) == '+') {
             if (i + 1 < program.size()) {
                 if (isdigit(program.at(i + 1))) {
                     i++;
                     bytes[pointer] += readNum(program, i);
-                } else if (program.at(i + 1)) {
+                } else if (program.at(i + 1) == '$') {
                     i++;
                     bytes[pointer] += value;
                 } else {
@@ -71,7 +104,7 @@ void runProgram(std::string program, int value) {
                 if (isdigit(program.at(i + 1))) {
                     i++;
                     bytes[pointer] -= readNum(program, i);
-                } else if (program.at(i + 1)) {
+                } else if (program.at(i + 1) == '$') {
                     i++;
                     bytes[pointer] -= value;
                 } else {
@@ -129,10 +162,36 @@ void runProgram(std::string program, int value) {
         } else if (program.at(i) == '=') {
             i++;
             if (isdigit(program.at(i))) {
-
+                bytes[pointer] = readNum(program, i);
             } else if (program.at(i) == '$') {
-
+                bytes[pointer] = value;
+            } else if (program.at(i) == '\"') {
+                i++;
+                std::string str = readString(program, i);
+                int j = 0;
+                for (int k = 0; k < str.size(); k++) {
+                    j++;
+                    bytes[pointer] = str.at(k);
+                    pointer++;
+                }
+                bytes[pointer] = j;
             }
+        } else if (program.at(i) == ';') {
+            i++;
+            if (isdigit(program.at(i))) {
+                int k = readNum(program, i);
+                for (int j = 0; j < k; j++) {
+                    std::cout << char(bytes[pointer]);
+                    pointer++;
+                }
+            } else if (program.at(i) == '$') {
+                for (int j = 0; j < value; j++) {
+                    std::cout << char(bytes[pointer]);
+                    pointer++;
+                }
+            }
+        } else if (program.at(i) == '@') {
+
         }
     }
 }
@@ -155,11 +214,11 @@ int main(int argc, char * argv[]) {
 
     std::string temp;
 
-    filein >> temp;
+    getline(filein, temp);
 
     while (!filein.fail()) {
         program << temp;
-        filein >> temp;
+        getline(filein, temp);
     }
 
     int value = 0;
