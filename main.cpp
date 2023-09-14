@@ -5,6 +5,11 @@
 
 int bytes[65536];
 unsigned int pointer = 0;
+int value[65536];
+
+enum {
+ // Place traps here
+};
 
 int readNum(std::string program, int& index) {
     std::stringstream numStr;
@@ -72,7 +77,35 @@ void findTag(std::string program, int& index, int tag) {
     index = tempIndex;
 }
 
-void runProgram(std::string program, int value) {
+void setStoredValue(std::string program, int& index, int newValue) {
+
+    int storedIndex = 0;
+
+    if (isdigit(program.at(index))) {
+        storedIndex = readNum(program, index);
+        value[storedIndex] = newValue;
+    }
+
+}
+
+int getStoredValue(std::string program, int& index) {
+
+    int storedValue = 0;
+
+    if (isdigit(program.at(index))) {
+        int temp = readNum(program, index);
+        storedValue = value[temp];
+    }
+
+    return storedValue;
+
+}
+
+void runTrap(int trapnum) {
+
+}
+
+void runProgram(std::string program) {
     for (int i = 0; i < program.size(); i++) {
         if (program.at(i) == '>') {
             if (i + 1 < program.size()) {
@@ -80,8 +113,8 @@ void runProgram(std::string program, int value) {
                     i++;
                     pointer += readNum(program, i);
                 } else if (program.at(i + 1) == '$') {
-                    i++;
-                    pointer += value;
+                    i += 2;
+                    pointer += getStoredValue(program, i);
                 } else {
                     pointer++;
                 }
@@ -94,8 +127,8 @@ void runProgram(std::string program, int value) {
                     i++;
                     pointer -= readNum(program, i);
                 } else if (program.at(i + 1) == '$') {
-                    i++;
-                    pointer -= value;
+                    i += 2;
+                    pointer -= getStoredValue(program, i);
                 } else {
                     pointer--;
                 }
@@ -108,8 +141,12 @@ void runProgram(std::string program, int value) {
                     i++;
                     bytes[pointer] += readNum(program, i);
                 } else if (program.at(i + 1) == '$') {
-                    i++;
-                    bytes[pointer] += value;
+                    i += 2;
+                    bytes[pointer] += getStoredValue(program, i);
+                }  else if (program.at(i + 1) == '\'') {
+                    i += 2;
+                    char ch = readChar(program, i);
+                    bytes[pointer] += int(ch);
                 } else {
                     bytes[pointer]++;
                 }
@@ -122,8 +159,12 @@ void runProgram(std::string program, int value) {
                     i++;
                     bytes[pointer] -= readNum(program, i);
                 } else if (program.at(i + 1) == '$') {
-                    i++;
-                    bytes[pointer] -= value;
+                    i += 2;
+                    bytes[pointer] -= getStoredValue(program, i);
+                }  else if (program.at(i + 1) == '\'') {
+                    i += 2;
+                    char ch = readChar(program, i);
+                    bytes[pointer] -= int(ch);
                 } else {
                     bytes[pointer]--;
                 }
@@ -136,8 +177,12 @@ void runProgram(std::string program, int value) {
                     i++;
                     bytes[pointer] *= readNum(program, i);
                 } else if (program.at(i + 1) == '$') {
-                    i++;
-                    bytes[pointer] *= value;
+                    i += 2;
+                    bytes[pointer] *= getStoredValue(program, i);
+                }  else if (program.at(i + 1) == '\'') {
+                    i += 2;
+                    char ch = readChar(program, i);
+                    bytes[pointer] *= int(ch);
                 } else {
                     bytes[pointer] *= 2;
                 }
@@ -148,8 +193,12 @@ void runProgram(std::string program, int value) {
                     i++;
                     bytes[pointer] /= readNum(program, i);
                 } else if (program.at(i + 1) == '$') {
-                    i++;
-                    bytes[pointer] /= value;
+                    i += 2;
+                    bytes[pointer] /= getStoredValue(program, i);
+                }  else if (program.at(i + 1) == '\'') {
+                    i += 2;
+                    char ch = readChar(program, i);
+                    bytes[pointer] /= int(ch);
                 } else {
                     bytes[pointer] /= 2;
                 }
@@ -160,8 +209,8 @@ void runProgram(std::string program, int value) {
                     i++;
                     bytes[pointer] %= readNum(program, i);
                 } else if (program.at(i + 1) == '$') {
-                    i++;
-                    bytes[pointer] %= value;
+                    i += 2;
+                    bytes[pointer] %= getStoredValue(program, i);
                 } else {
                     bytes[pointer] %= 2;
                 }
@@ -184,8 +233,10 @@ void runProgram(std::string program, int value) {
                         findTag(program, i, tagNum);
                     }
                 } else if (program.at(i) == '$') {
-                    if (bytes[pointer] == value) {
-                        findTag(program, i, value);
+                    i++;
+                    int temp = getStoredValue(program, i);
+                    if (bytes[pointer] == temp) {
+                        findTag(program, i, temp);
                     }
                 }
             } else if (program.at(i) == '\"') {
@@ -201,7 +252,9 @@ void runProgram(std::string program, int value) {
                         }
                     } else if (program.at(i) == '$') {
                         if (bytes[pointer] < 0) {
-                            findTag(program, i, value);
+                            i++;
+                            int temp = getStoredValue(program, i);
+                            findTag(program, i, temp);
                         }
                     }              
                 } else if (str == "p") {
@@ -214,7 +267,9 @@ void runProgram(std::string program, int value) {
                         }
                     } else if (program.at(i) == '$') {
                         if (bytes[pointer] > 0) {
-                            findTag(program, i, value);
+                            i++;
+                            int temp = getStoredValue(program, i);
+                            findTag(program, i, temp);
                         }
                     }              
                 } else if (str == "z") {
@@ -227,7 +282,9 @@ void runProgram(std::string program, int value) {
                         }
                     } else if (program.at(i) == '$') {
                         if (bytes[pointer] == 0) {
-                            findTag(program, i, value);
+                            i++;
+                            int temp = getStoredValue(program, i);
+                            findTag(program, i, temp);
                         }
                     }              
                 } else if (str == "np") {
@@ -240,7 +297,9 @@ void runProgram(std::string program, int value) {
                         }
                     } else if (program.at(i) == '$') {
                         if (bytes[pointer] != 0) {
-                            findTag(program, i, value);
+                            i++;
+                            int temp = getStoredValue(program, i);
+                            findTag(program, i, temp);
                         }
                     }   
                 } else if (str == "nz") {
@@ -253,7 +312,9 @@ void runProgram(std::string program, int value) {
                         }
                     } else if (program.at(i) == '$') {
                         if (bytes[pointer] <= 0) {
-                            findTag(program, i, value);
+                            i++;
+                            int temp = getStoredValue(program, i);
+                            findTag(program, i, temp);
                         }
                     }   
                 } else if (str == "zp") {
@@ -266,7 +327,9 @@ void runProgram(std::string program, int value) {
                         }
                     } else if (program.at(i) >= '$') {
                         if (bytes[pointer] <= 0) {
-                            findTag(program, i, value);
+                            i++;
+                            int temp = getStoredValue(program, i);
+                            findTag(program, i, temp);
                         }
                     }   
                 } else if (str == "nzp") {
@@ -276,18 +339,22 @@ void runProgram(std::string program, int value) {
                         int tagNum = readNum(program, i);
                         findTag(program, i, tagNum);
                     } else if (program.at(i) == '$') {
-                        findTag(program, i, value);
+                        i++;
+                        int temp = getStoredValue(program, i);
+                        findTag(program, i, temp);
                     }   
                 }
             }
         } else if (program.at(i) == '$') {
-            value = bytes[pointer];
+            i++;
+            setStoredValue(program, i, bytes[pointer]);
         } else if (program.at(i) == '=') {
             i++;
             if (isdigit(program.at(i))) {
                 bytes[pointer] = readNum(program, i);
             } else if (program.at(i) == '$') {
-                bytes[pointer] = value;
+                i++;
+                bytes[pointer] = getStoredValue(program, i);
             } else if (program.at(i) == '\"') {
                 i++;
                 std::string str = readString(program, i);
@@ -312,7 +379,9 @@ void runProgram(std::string program, int value) {
                     pointer++;
                 }
             } else if (program.at(i) == '$') {
-                for (int j = 0; j < value; j++) {
+                i++;
+                int temp = getStoredValue(program, i);
+                for (int j = 0; j < temp; j++) {
                     std::cout << char(bytes[pointer]);
                     pointer++;
                 }
@@ -322,7 +391,8 @@ void runProgram(std::string program, int value) {
             if (isdigit(program.at(i))) {
                 pointer = readNum(program, i);
             } else if (program.at(i) == '$') {
-                pointer = value;
+                i++;
+                pointer = getStoredValue(program, i);
             }
         } else if (program.at(i) == '#') {
             std::string line;
@@ -338,6 +408,38 @@ void runProgram(std::string program, int value) {
             std::string line;
             getline(std::cin, line);
             bytes[pointer] = std::atoi(line.c_str());
+        } else if (program.at(i) == '~') {
+            i++;
+            if (isdigit(program.at(i))) {
+                int tagNum = readNum(program, i);
+                int tempIndex = i;
+                findTag(program, i, tagNum);
+                bytes[pointer] = tempIndex;
+            } else if (program.at(i) == '$') {
+                i++;
+                int temp = getStoredValue(program, i);
+                int tempIndex = i;
+                findTag(program, i, temp);
+                bytes[pointer] = tempIndex;
+            }
+        } else if (program.at(i) == '`') {
+            i++;
+            if (isdigit(program.at(i))) {
+                i = readNum(program, i);
+            } else if (program.at(i) == '$') {
+                i++;
+                i = getStoredValue(program, i);
+            }
+        } else if (program.at(i) == '|') {
+            i++;
+            if (isdigit(program.at(i))) {
+                int trapnum = readNum(program, i);
+                runTrap(trapnum);
+            } else if (program.at(i) == '$') {
+                i++;
+                int trapnum = getStoredValue(program, i);
+                runTrap(trapnum);
+            }
         }
     }
 }
@@ -367,9 +469,7 @@ int main(int argc, char * argv[]) {
         getline(filein, temp);
     }
 
-    int value = 0;
-
-    runProgram(program.str(), value);
+    runProgram(program.str());
     std::cout << std::endl;
 
     return 0;
