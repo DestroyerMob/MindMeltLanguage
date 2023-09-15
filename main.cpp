@@ -378,12 +378,15 @@ void runProgram(std::string program) {
                     std::cout << char(bytes[pointer]);
                     pointer++;
                 }
-            } else if (program.at(i) == '$') {
+            } else if (program.at(i) == '^') {
                 i++;
-                int temp = getStoredValue(program, i);
-                for (int j = 0; j < temp; j++) {
-                    std::cout << char(bytes[pointer]);
-                    pointer++;
+                if (program.at(i) == '$') {
+                    i++;
+                    int temp = getStoredValue(program, i);
+                    for (int j = 0; j < temp; j++) {
+                        std::cout << char(bytes[pointer]);
+                        pointer++;
+                    }
                 }
             }
         } else if (program.at(i) == '@') {
@@ -394,7 +397,7 @@ void runProgram(std::string program) {
                 i++;
                 pointer = getStoredValue(program, i);
             }
-        } else if (program.at(i) == '#') {
+        } else if (program.at(i) == '&') {
             std::string line;
             getline(std::cin, line);
             int j = 0;
@@ -404,7 +407,7 @@ void runProgram(std::string program) {
                 pointer++;
             }
             bytes[pointer] = j;
-        } else if (program.at(i) == '&') {
+        } else if (program.at(i) == '#') {
             std::string line;
             getline(std::cin, line);
             bytes[pointer] = std::atoi(line.c_str());
