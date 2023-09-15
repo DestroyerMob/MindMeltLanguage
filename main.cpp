@@ -345,9 +345,12 @@ void runProgram(std::string program) {
                     }   
                 }
             }
-        } else if (program.at(i) == '$') {
+        } else if (program.at(i) == '^') {
             i++;
-            setStoredValue(program, i, bytes[pointer]);
+            if (program.at(i) == '$') {
+                i++;
+                setStoredValue(program, i, bytes[pointer]);
+            }
         } else if (program.at(i) == '=') {
             i++;
             if (isdigit(program.at(i))) {
@@ -378,15 +381,12 @@ void runProgram(std::string program) {
                     std::cout << char(bytes[pointer]);
                     pointer++;
                 }
-            } else if (program.at(i) == '^') {
+            } else if (program.at(i) == '$') {
                 i++;
-                if (program.at(i) == '$') {
-                    i++;
-                    int temp = getStoredValue(program, i);
-                    for (int j = 0; j < temp; j++) {
-                        std::cout << char(bytes[pointer]);
-                        pointer++;
-                    }
+                int temp = getStoredValue(program, i);
+                for (int j = 0; j < temp; j++) {
+                    std::cout << char(bytes[pointer]);
+                    pointer++;
                 }
             }
         } else if (program.at(i) == '@') {
