@@ -42,6 +42,12 @@ char readChar(std::string program, int& index) {
 
     index--;
 
+    if (sStr.str() == "\\n") {
+        return '\n';
+    } else if (sStr.str() == "\\t") {
+        return '\t';
+    }
+
     return sStr.str().at(0);
 }
 
@@ -102,7 +108,7 @@ int getStoredValue(std::string program, int& index) {
 }
 
 void runTrap(int trapnum) {
-
+    // Run traps here
 }
 
 void runProgram(std::string program) {
@@ -364,7 +370,23 @@ void runProgram(std::string program) {
                 int j = 0;
                 for (int k = 0; k < str.size(); k++) {
                     j++;
-                    bytes[pointer] = str.at(k);
+                    if (k < str.size() - 1) {
+                        if (str.at(k) == '\\') {
+                            if (str.at(k + 1) == 'n') {
+                                k++;
+                                bytes[pointer] = '\n';
+                            } else if (str.at(k + 1) == 't') {
+                                k++;
+                                bytes[pointer] = '\t';
+                            } else {
+                                bytes[pointer] = str.at(k);
+                            }
+                        } else {
+                            bytes[pointer] = str.at(k);
+                        }
+                    } else {
+                        bytes[pointer] = str.at(k);
+                    }
                     pointer++;
                 }
                 bytes[pointer] = j;
@@ -377,17 +399,21 @@ void runProgram(std::string program) {
             i++;
             if (isdigit(program.at(i))) {
                 int k = readNum(program, i);
+                std::stringstream sStr;
                 for (int j = 0; j < k; j++) {
-                    std::cout << char(bytes[pointer]);
+                    sStr << char(bytes[pointer]);
                     pointer++;
                 }
+                std::cout << sStr.str();
             } else if (program.at(i) == '$') {
                 i++;
                 int temp = getStoredValue(program, i);
+                std::stringstream sStr;
                 for (int j = 0; j < temp; j++) {
-                    std::cout << char(bytes[pointer]);
+                    sStr << char(bytes[pointer]);
                     pointer++;
                 }
+                std::cout << sStr.str();
             }
         } else if (program.at(i) == '@') {
             i++;
